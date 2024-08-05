@@ -8,15 +8,26 @@ class Distance:
     km: float
 
     def __init__(self, km: float, /):
+        # TODO: Allow other units
         self.km = km
-
-    def __str__(self) -> str:
-        return f"{self.km} km"
 
     @classmethod
     def parse(cls, s: str) -> Self:
         value = float(s.split(" ")[0])
         return cls(value)
+
+    def __str__(self) -> str:
+        return f"{self.km} km"
+
+    def __add__(self, other: "Distance") -> "Distance":
+        if isinstance(other, Distance):
+            return Distance(self.km + other.km)
+        return NotImplemented
+
+    def __sub__(self, other: "Distance") -> "Distance":
+        if isinstance(other, Distance):
+            return Distance(self.km - other.km)
+        return NotImplemented
 
     def __mul__(self, other):
         if isinstance(other, (int, float)):
@@ -30,11 +41,11 @@ class Distance:
 class Duration:
     seconds: float
 
-    def __init__(self, value: float | timedelta):
-        if isinstance(value, timedelta):
-            self.seconds = value.total_seconds()
+    def __init__(self, seconds: float | timedelta, /):
+        if isinstance(seconds, timedelta):
+            self.seconds = seconds.total_seconds()
         else:
-            self.seconds = value
+            self.seconds = seconds
 
     @classmethod
     def parse(cls, s: str, /) -> Self:
@@ -45,6 +56,24 @@ class Duration:
     def __str__(self) -> str:
         return format_interval(self.seconds)
 
+    def __repr__(self) -> str:
+        return f"duration('{self!s}')"
+
+    def __add__(self, other: "Duration") -> "Duration":
+        if isinstance(other, Duration):
+            return Duration(self.seconds + other.seconds)
+        return NotImplemented
+
+    def __sub__(self, other: "Duration") -> "Duration":
+        if isinstance(other, Duration):
+            return Duration(self.seconds - other.seconds)
+        return NotImplemented
+
+    def __mul__(self, other: Any) -> Any:
+        if isinstance(other, (int, float)):
+            return Duration(self.seconds * other)
+        return NotImplemented
+
     def __truediv__(self, other):
         if isinstance(other, (int, float)):
             return Duration(self.seconds / other)
@@ -52,6 +81,7 @@ class Duration:
             return Pace(self.seconds / other.km)
         if isinstance(other, Duration):
             return self.seconds / other.seconds
+        return NotImplemented
 
 
 class Pace:
@@ -64,6 +94,9 @@ class Pace:
     def __str__(self):
         return format_interval(self.seconds_per_km)
 
+    def __repr__(self) -> str:
+        return f"pace('{self!s}')"
+
     def __mul__(self, other):
         if isinstance(other, (int, float)):
             return Pace(self.seconds_per_km * other)
@@ -71,6 +104,11 @@ class Pace:
             return Duration(self.seconds_per_km * other.km)
         else:
             return NotImplemented
+
+    def __truediv__(self, other):
+        if isinstance(other, (int, float)):
+            return Pace(self.seconds_per_km / other)
+        return NotImplemented
 
     @classmethod
     def parse(cls, s: str, /) -> Self:

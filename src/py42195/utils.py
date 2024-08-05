@@ -13,24 +13,26 @@ def parse_interval(s: Optional[str], /) -> Optional[timedelta]:
         return None
     elif s in ["-", "nan", "np.nan"]:
         return None
-    else:
-        try:
-            frags = s.split(":")
-            frags = [float(frag) for frag in frags]
-            if len(frags) == 1:
-                interval = timedelta(seconds=float(frags[0]))
-            else:
-                interval = timedelta(
-                    hours=frags[-3] if len(frags) == 3 else 0,
-                    minutes=frags[-2],
-                    seconds=frags[-1],
-                )
-            if not interval.total_seconds():
-                return None
-            else:
-                return interval
-        except ValueError:
-            raise ValueError(f"Cannot parse as time: {s}")
+    elif not isinstance(s, str):
+        return TypeError(f"Expected string, got {type(s)}")
+
+    try:
+        frags = s.split(":")
+        frags = [float(frag) for frag in frags]
+        if len(frags) == 1:
+            interval = timedelta(seconds=float(frags[0]))
+        else:
+            interval = timedelta(
+                hours=frags[-3] if len(frags) == 3 else 0,
+                minutes=frags[-2],
+                seconds=frags[-1],
+            )
+        if not interval.total_seconds():
+            return None
+        else:
+            return interval
+    except ValueError:
+        raise ValueError(f"Cannot parse as time: {s}")
 
 
 def format_interval(
