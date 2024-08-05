@@ -1,9 +1,11 @@
 from datetime import timedelta
+from functools import total_ordering
 from typing import Any, Self
 
 from py42195.utils import format_interval, parse_interval
 
 
+@total_ordering
 class Distance:
     km: float
 
@@ -18,6 +20,9 @@ class Distance:
 
     def __str__(self) -> str:
         return f"{self.km} km"
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({self.km})"
 
     def __add__(self, other: "Distance") -> "Distance":
         if isinstance(other, Distance):
@@ -47,7 +52,18 @@ class Distance:
             return self.km / other.km
         return NotImplemented
 
+    def __eq__(self, other: object, /) -> bool:
+        if isinstance(other, Distance):
+            return self.km == other.km
+        return NotImplemented
 
+    def __lt__(self, other: object, /) -> bool:
+        if isinstance(other, Distance):
+            return self.km < other.km
+        return NotImplemented
+
+
+@total_ordering
 class Duration:
     seconds: float
 
@@ -95,7 +111,22 @@ class Duration:
             return self.seconds / other.seconds
         return NotImplemented
 
+    def __eq__(self, other: object, /) -> bool:
+        if isinstance(other, Duration):
+            return self.seconds == other.seconds
+        if isinstance(other, timedelta):
+            return self.seconds == other.total_seconds()
+        return NotImplemented
 
+    def __lt__(self, other: object, /) -> bool:
+        if isinstance(other, Duration):
+            return self.seconds < other.seconds
+        if isinstance(other, timedelta):
+            return self.seconds < other.total_seconds()
+        return NotImplemented
+
+
+@total_ordering
 class Pace:
     seconds_per_km: float
 
@@ -135,6 +166,16 @@ class Pace:
             return Pace(self.seconds_per_km / other)
         if isinstance(other, Pace):
             return self.seconds_per_km / other.seconds_per_km
+        return NotImplemented
+
+    def __eq__(self, other: object, /) -> bool:
+        if isinstance(other, Pace):
+            return self.seconds_per_km == other.seconds_per_km
+        return NotImplemented
+
+    def __lt__(self, other: object, /) -> bool:
+        if isinstance(other, Pace):
+            return self.seconds_per_km < other.seconds_per_km
         return NotImplemented
 
     @classmethod
