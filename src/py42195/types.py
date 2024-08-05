@@ -37,6 +37,16 @@ class Distance:
         else:
             return NotImplemented
 
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __truediv__(self, other):
+        if isinstance(other, (int, float)):
+            return Distance(self.km / other)
+        if isinstance(other, Distance):
+            return self.km / other.km
+        return NotImplemented
+
 
 class Duration:
     seconds: float
@@ -79,6 +89,8 @@ class Duration:
             return Duration(self.seconds / other)
         if isinstance(other, Distance):
             return Pace(self.seconds / other.km)
+        if isinstance(other, Pace):
+            return Distance(self.seconds / other.seconds_per_km)
         if isinstance(other, Duration):
             return self.seconds / other.seconds
         return NotImplemented
@@ -97,6 +109,16 @@ class Pace:
     def __repr__(self) -> str:
         return f"pace('{self!s}')"
 
+    def __add__(self, other):
+        if isinstance(other, Pace):
+            return Pace(self.seconds_per_km + other.seconds_per_km)
+        return NotImplemented
+
+    def __sub__(self, other):
+        if isinstance(other, Pace):
+            return Pace(self.seconds_per_km - other.seconds_per_km)
+        return NotImplemented
+
     def __mul__(self, other):
         if isinstance(other, (int, float)):
             return Pace(self.seconds_per_km * other)
@@ -105,9 +127,14 @@ class Pace:
         else:
             return NotImplemented
 
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
     def __truediv__(self, other):
         if isinstance(other, (int, float)):
             return Pace(self.seconds_per_km / other)
+        if isinstance(other, Pace):
+            return self.seconds_per_km / other.seconds_per_km
         return NotImplemented
 
     @classmethod
