@@ -1,4 +1,3 @@
-from py42195.constants import HALF_MARATHON, MARATHON
 from py42195.types import Distance, Duration, Pace, distance, duration, pace
 
 __all__ = [
@@ -8,6 +7,4 @@ __all__ = [
     "distance",
     "duration",
     "pace",
-    "MARATHON",
-    "HALF_MARATHON",
 ]

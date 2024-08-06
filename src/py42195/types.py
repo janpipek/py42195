@@ -2,6 +2,9 @@ from datetime import timedelta
 from functools import total_ordering
 from typing import Any, Self
 
+from typing_extensions import ClassVar, Optional
+
+from py42195.constants import HALF_MARATHON_IN_KM, MARATHON_IN_KM, MILES_IN_KM
 from py42195.utils import format_interval, parse_interval
 
 
@@ -9,9 +12,22 @@ from py42195.utils import format_interval, parse_interval
 class Distance:
     km: float
 
-    def __init__(self, km: float, /):
-        # TODO: Allow other units
-        self.km = km
+    MARATHON: ClassVar["Distance"]
+    HALF_MARATHON: ClassVar["Distance"]
+
+    def __init__(self, km: Optional[float] = None, *, mi: Optional[float] = None):
+        if (km is not None) and (mi is not None):
+            raise ValueError("Either km or mi should be provided")
+        elif km is not None:
+            self.km = km
+        elif mi is not None:
+            self.km = mi * MILES_IN_KM
+        else:
+            raise ValueError("Either km or mi should be provided")
+
+    @property
+    def mi(self) -> float:
+        return self.km / MILES_IN_KM
 
     @classmethod
     def parse(cls, s: str) -> Self:
@@ -61,6 +77,10 @@ class Distance:
         if isinstance(other, Distance):
             return self.km < other.km
         return NotImplemented
+
+
+Distance.MARATHON = Distance(MARATHON_IN_KM)
+Distance.HALF_MARATHON = Distance(HALF_MARATHON_IN_KM)
 
 
 @total_ordering

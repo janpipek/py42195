@@ -1,7 +1,12 @@
 import pytest
 
-from py42195.constants import MARATHON
-from py42195.types import Pace, duration, pace
+from py42195.types import Distance, Pace, duration, pace
+
+
+class TestDistance:
+    def test_marathon_distances(self):
+        assert pytest.approx(Distance.MARATHON.km, abs=0.01) == 42.195
+        assert pytest.approx(Distance.HALF_MARATHON.mi, abs=0.01) == 13.11
 
 
 class TestPace:
@@ -22,9 +27,9 @@ class TestPace:
 
 class TestArithmetics:
     def test_marathon_record_pace(self):
-        pace = duration("2:00:35") / MARATHON
+        pace = duration("2:00:35") / Distance.MARATHON
         assert str(pace) == "2:51.5"
 
     def test_marathon_at_4_min_pace(self):
-        duration = MARATHON * pace("4:00")
+        duration = Distance.MARATHON * pace("4:00")
         assert str(duration) == "2:48:46.8"
