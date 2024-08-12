@@ -25,7 +25,7 @@ class Distance:
 
     ALLOWED_UNITS = ["km", "mi", "m", "yd", "ft"]
     PARSE_PATTERN: re.Pattern = re.compile(
-        r"^(?P<value>\d+(\.\d+)?)\s*(?P<unit>km|mi|m|yd|ft)?$"
+        r"^(?P<value>\d+(\.\d+)?)\s*(?P<unit>" + "|".join(ALLOWED_UNITS) + ")?$"
     )
 
     def __init__(
@@ -37,14 +37,8 @@ class Distance:
         yd: Optional[float] = None,
         ft: Optional[float] = None,
     ):
-        if (
-            len(
-                args_given := [
-                    unit for unit in self.ALLOWED_UNITS if locals().get(unit)
-                ]
-            )
-            != 1
-        ):
+        args_given = [unit for unit in self.ALLOWED_UNITS if locals().get(unit)]
+        if len(args_given) != 1:
             raise ValueError(
                 f"Exactly one of the following arguments should be provided: {', '.join(self.ALLOWED_UNITS)}, "
                 f"got {len(args_given)}: {', '.join(args_given)}"
@@ -110,6 +104,10 @@ class Distance:
             return Distance(self.km / other)
         if isinstance(other, Distance):
             return self.km / other.km
+        if isinstance(other, Duration):
+            return Speed(km_h=self.km / (other.seconds * 3600))
+        if isinstance(other, Speed):
+            return Duration(self.km / other.km_h * 3600)
         return NotImplemented
 
     def __eq__(self, other: object, /) -> bool:
@@ -162,6 +160,8 @@ class Duration:
     def __mul__(self, other: Any) -> Any:
         if isinstance(other, (int, float)):
             return Duration(self.seconds * other)
+        if isinstance(other, Speed):
+            return Distance(self.seconds * other.km_h / 3600)
         return NotImplemented
 
     def __truediv__(self, other):
@@ -173,6 +173,8 @@ class Duration:
             return Distance(self.seconds / other.seconds_per_km)
         if isinstance(other, Duration):
             return self.seconds / other.seconds
+        if isinstance(other, timedelta):
+            return self.seconds / other.total_seconds()
         return NotImplemented
 
     def __eq__(self, other: object, /) -> bool:
@@ -268,6 +270,116 @@ class Pace:
             raise ValueError(f"Cannot parse as pace: {s}")
         return cls(delta.total_seconds())
 
+    def to_speed(self) -> "Speed":
+        return Speed(3600 / self.seconds_per_km)
+
+
+@total_ordering
+class Speed:
+    km_h: float
+
+    ALLOWED_UNITS = {
+        "kmh": "km_h",
+        "km/h": "km_h",
+        "mph": "mph",
+        "mi/h": "mph",
+        "m/s": "m_s",
+    }
+    PARSE_PATTERN: re.Pattern = re.compile(
+        r"^(?P<value>\d+(\.\d+)?)\s*(?P<unit>" + "|".join(ALLOWED_UNITS) + ")?$"
+    )
+
+    def __init__(
+        self,
+        km_h: Optional[float] = None,
+        *,
+        mph: Optional[float] = None,
+        m_s: Optional[float] = None,
+    ) -> None:
+        args_given = [
+            unit for unit in set(self.ALLOWED_UNITS.values()) if locals().get(unit)
+        ]
+        if len(args_given) != 1:
+            raise ValueError(
+                f"Exactly one of the following arguments should be provided: {', '.join(self.ALLOWED_UNITS)}, "
+                f"got {len(args_given)}: {', '.join(args_given)}"
+            )
+
+        if km_h is not None:
+            self.km_h = km_h
+        elif mph is not None:
+            self.km_h = mph * MILES_IN_KM
+        elif m_s is not None:
+            self.km_h = m_s * 3600 / 1000
+
+        if not isinstance(self.km_h, (int, float)):
+            raise ValueError("Speed should be a number.")
+
+    def __lt__(self, other: object, /) -> bool:
+        if isinstance(other, Speed):
+            return self.km_h < other.km_h
+        return NotImplemented
+
+    def __eq__(self, other: object, /) -> bool:
+        if isinstance(other, Speed):
+            return self.km_h == other.km_h
+        return NotImplemented
+
+    @classmethod
+    def parse(cls, s: str) -> Self:
+        # split into unit and value
+        match = cls.PARSE_PATTERN.match(s)
+        if match is None:
+            raise ValueError(f"Cannot parse as speed: {s}")
+        value = float(match.group("value"))
+        unit = cls.ALLOWED_UNITS.get(match.group("unit")) or "km_h"
+        return cls(**{unit: value})
+
+    @property
+    def m_s(self) -> float:
+        return self.km_h * 1000 / 3600
+
+    @property
+    def mph(self) -> float:
+        return self.km_h / MILES_IN_KM
+
+    def to_pace(self) -> Pace:
+        return Pace(3600 / self.km_h)
+
+    def __mul__(self, other):
+        if isinstance(other, (int, float)):
+            return Speed(km_h=self.km_h * other)
+        if isinstance(other, Duration):
+            return Distance(km=self.km_h * other.seconds / 3600)
+        else:
+            return NotImplemented
+
+    def __rmul__(self, other):
+        return self.__mul__(other)
+
+    def __add__(self, other, /):
+        if isinstance(other, Speed):
+            return Speed(km_h=self.km_h + other.km_h)
+        return NotImplemented
+
+    def __sub__(self, other, /):
+        if isinstance(other, Speed):
+            return Speed(km_h=self.km_h - other.km_h)
+        return NotImplemented
+
+    def __truediv__(self, other, /):
+        if isinstance(other, (int, float)):
+            return Speed(km_h=self.km_h / other)
+        if isinstance(other, Speed):
+            return self.km_h / other.km_h
+        return NotImplemented
+
+    def __str__(self):
+        return f"{self.km_h:.2f} km/h"
+
+    def __repr__(self) -> str:
+        return f"speed('{self!s}')"
+
 
 def pace(value: Any, **kwargs) -> Pace:
     if isinstance(value, str):
@@ -290,3 +402,10 @@ def distance(value: Any) -> Distance:
         return Distance.parse(value)
     else:
         return Distance(value)
+
+
+def speed(value: Any) -> Speed:
+    if isinstance(value, str):
+        return Speed.parse(value)
+    else:
+        return Speed(km_h=value)

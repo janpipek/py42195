@@ -19,6 +19,14 @@ How fast do I (well, not me) need to be to finish a marathon in 2 hours?
 pace('2:50.6')
 ```
 
+What would be the speed in mph?
+
+```python
+>>> desired_speed = desired_pace.to_speed()
+>>> desired_speed.mph
+13.109  # + a few more digits
+```
+
 Will I be able to finish a half-marathon in 1:30 hours if I run at a pace of 4:07 min/km?
 
 ```python
@@ -41,5 +49,4 @@ duration('1:20:28')
 ## TODOs
 
 - [ ] Add proper support for imperial units in printing
-- [ ] Add speed
 - [ ] Add more documentation
