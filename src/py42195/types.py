@@ -150,9 +150,28 @@ class Duration:
 class Pace:
     seconds_per_km: float
 
-    # TODO: Include imperial metrics
-    def __init__(self, seconds_per_km: float, /):
-        self.seconds_per_km = seconds_per_km
+    def __init__(
+        self,
+        seconds_per_km: Optional[float] = None,
+        *,
+        seconds_per_mile: Optional[float] = None,
+    ):
+        if (seconds_per_mile is not None) and (seconds_per_km is not None):
+            raise ValueError(
+                "Either seconds_per_mile or seconds_per_km should be provided"
+            )
+        elif seconds_per_km is not None:
+            self.seconds_per_km = seconds_per_km
+        elif seconds_per_mile is not None:
+            self.seconds_per_km = seconds_per_mile / MILES_IN_KM
+        else:
+            raise ValueError(
+                "Either seconds_per_mile or seconds_per_km should be provided"
+            )
+
+    @property
+    def seconds_per_mile(self) -> float:
+        return self.seconds_per_km * MILES_IN_KM
 
     def __str__(self):
         return format_interval(self.seconds_per_km)

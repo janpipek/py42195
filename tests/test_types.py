@@ -1,3 +1,5 @@
+import math
+
 import pytest
 
 from py42195.types import Distance, Pace, duration, pace
@@ -23,6 +25,14 @@ class TestPace:
         def test_valid(self, string, seconds):
             pace = Pace.parse(string)
             assert pace.seconds_per_km == seconds
+
+    @pytest.mark.parametrize(
+        ("seconds_per_km", "seconds_per_mile"), [(240, 386.24), (math.inf, math.inf)]
+    )
+    def test_units_equivalence(self, seconds_per_km, seconds_per_mile):
+        pace_km = Pace(seconds_per_km)
+        pace_mi = Pace(seconds_per_mile=seconds_per_mile)
+        assert pace_km.seconds_per_km == pytest.approx(pace_mi.seconds_per_km, abs=0.01)
 
 
 class TestArithmetics:
