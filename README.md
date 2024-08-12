@@ -2,6 +2,12 @@
 
 Tiny library to help you keep in (running) pace.
 
+## Installation
+
+```bash
+pip install py42195  # or `uv pip install py42195`
+```
+
 ## Examples
 
 How fast do I (well, not me) need to be to finish a marathon in 2 hours?
@@ -21,3 +27,19 @@ Will I be able to finish a half-marathon in 1:30 hours if I run at a pace of 4:0
 >>> my_pace * Distance.HALF_MARATHON <= duration("1:30:00")
 True  # 1:26:51
 ```
+
+How long will it take me to run 10 miles at a pace of 5:00 min/km?
+
+```python
+>>> from py42195 import pace, distance
+>>> my_pace = pace("5:00")
+>>> my_distance = distance("10 mi")
+>>> my_pace * my_distance
+duration('1:20:28')
+```
+
+## TODOs
+
+- [ ] Add proper support for imperial units in printing
+- [ ] Add speed
+- [ ] Add more documentation
