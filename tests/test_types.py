@@ -10,11 +10,45 @@ class TestDistance:
         assert pytest.approx(Distance.MARATHON.km, abs=0.01) == 42.195
         assert pytest.approx(Distance.HALF_MARATHON.mi, abs=0.01) == 13.11
 
+    @pytest.mark.parametrize(
+        ("source", "expected"),
+        [
+            ("1.4", 1.4),
+            ("1 km", 1),
+            ("2mi", 3.218),
+            ("750 m", 0.75),
+            ("-4km", ValueError),
+            ("1760yd", 1.609),
+            ("10ft", 0.003048),
+            ("m48", ValueError),
+            ("a lot", ValueError),
+        ],
+    )
+    def test_parse(self, source, expected):
+        if isinstance(expected, type) and issubclass(expected, Exception):
+            with pytest.raises(expected):
+                Distance.parse(source)
+        else:
+            assert Distance.parse(source).km == pytest.approx(expected, abs=0.001)
+
+    @pytest.mark.parametrize(
+        ("kwargs", "error"),
+        [
+            ({"m": 1, "km": 2}, ValueError),
+            ({"aa": 1}, TypeError),
+            ({}, ValueError),
+            ({"km": "many"}, TypeError),
+        ],
+    )
+    def test_invalid_args(self, kwargs, error):
+        with pytest.raises(error):
+            Distance(**kwargs)
+
 
 class TestPace:
     class TestParse:
         @pytest.mark.parametrize(
-            ("string", "seconds"),
+            ("source", "expected"),
             [
                 ("4:00", 240),
                 ("4:00.0", 240),
@@ -22,9 +56,9 @@ class TestPace:
                 ("1:00:01", 3601),
             ],
         )
-        def test_valid(self, string, seconds):
-            pace = Pace.parse(string)
-            assert pace.seconds_per_km == seconds
+        def test_valid(self, source, expected):
+            pace = Pace.parse(source)
+            assert pace.seconds_per_km == expected
 
     @pytest.mark.parametrize(
         ("seconds_per_km", "seconds_per_mile"), [(240, 386.24), (math.inf, math.inf)]
