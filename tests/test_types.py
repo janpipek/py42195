@@ -2,7 +2,8 @@ import math
 
 import pytest
 
-from py42195.types import Distance, Pace, Speed, duration, pace, speed
+from py42195.config import set_unit_system
+from py42195.types import Distance, Pace, Speed, distance, duration, pace, speed
 
 
 class TestDistance:
@@ -43,6 +44,19 @@ class TestDistance:
     def test_invalid_args(self, kwargs, error):
         with pytest.raises(error):
             Distance(**kwargs)
+
+    @pytest.mark.parametrize(
+        ("unit_system", "value", "expected"),
+        [
+            ("si", "1 km", "1.00 km"),
+            ("imperial", "1 km", "0.62 mi"),
+            (None, "1 mi", "1.61 km"),
+        ],
+    )
+    def test_str(self, unit_system, value, expected):
+        a_distance = distance(value)
+        with set_unit_system(unit_system or "si"):
+            assert str(a_distance) == expected
 
 
 class TestPace:

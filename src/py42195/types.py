@@ -5,6 +5,7 @@ from typing import Any, Self
 
 from typing_extensions import ClassVar, Optional
 
+from py42195.config import get_unit_system
 from py42195.constants import (
     FEET_IN_KM,
     HALF_MARATHON_IN_KM,
@@ -73,10 +74,14 @@ class Distance:
         return cls(**{unit: value})
 
     def __str__(self) -> str:
-        return f"{self.km} km"
+        if get_unit_system() == "imperial":
+            return f"{self.mi:.2f} mi"
+        return f"{self.km:.2f} km"
 
     def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({self.km})"
+        if get_unit_system() == "imperial":
+            return f"Distance(mi={self.mi})"
+        return f"Distance(km={self.km})"
 
     def __add__(self, other: "Distance") -> "Distance":
         if isinstance(other, Distance):
