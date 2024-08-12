@@ -1,6 +1,6 @@
 # py42195
 
-Tiny library to help you keep in (running) pace.
+Tiny library in pure Python to help you keep in (running) pace.
 
 ## Installation
 
