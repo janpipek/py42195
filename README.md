@@ -46,14 +46,19 @@ How long will it take me to run 10 miles at a pace of 5:00 min/km?
 duration('1:20:28')
 ```
 
-Enable the imperial units by default (note that this affect only printing):
+## Configuration
+
+By default, the library uses the metric system. You can change it by calling `set_unit_system`:
 
 ```python
 >>> from py42195 import set_unit_system, IMPERIAL, Distance
->>> with set_unit_system("imperial"):
+>>> with set_unit_system(IMPERIAL):
 ...     print(Distance.MARATHON)
 26.22 mi
 ```
+
+You can also explicitly choose the unit system ("metric" or "imperial") using the
+`PY42195_UNIT_SYSTEM` environment variable.
 
 ## TODOs
 

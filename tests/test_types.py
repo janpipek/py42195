@@ -2,7 +2,7 @@ import math
 
 import pytest
 
-from py42195.config import set_unit_system
+from py42195.config import IMPERIAL, METRIC, set_unit_system
 from py42195.types import Distance, Pace, Speed, distance, duration, pace, speed
 
 
@@ -48,14 +48,14 @@ class TestDistance:
     @pytest.mark.parametrize(
         ("unit_system", "value", "expected"),
         [
-            ("si", "1 km", "1.00 km"),
-            ("imperial", "1 km", "0.62 mi"),
+            (METRIC, "1 km", "1.00 km"),
+            (IMPERIAL, "1 km", "0.62 mi"),
             (None, "1 mi", "1.61 km"),
         ],
     )
     def test_str(self, unit_system, value, expected):
         a_distance = distance(value)
-        with set_unit_system(unit_system or "si"):
+        with set_unit_system(unit_system or METRIC):
             assert str(a_distance) == expected
 
 
@@ -74,11 +74,29 @@ class TestPace:
             pace = Pace.parse(source)
             assert pace.seconds_per_km == expected
 
+        @pytest.mark.parametrize(
+            "source",
+            [
+                "1:74",
+                "1 km",
+                "fast",
+                "1 s",
+                "1:45:45:10",
+                "1.1:2",
+                "45.2:12",
+                "1:69:02",
+                "1::",
+            ],
+        )
+        def test_invalid(self, source):
+            with pytest.raises(ValueError):
+                Pace.parse(source)
+
     @pytest.mark.parametrize(
         ("seconds_per_km", "seconds_per_mile"), [(240, 386.24), (math.inf, math.inf)]
     )
     def test_units_equivalence(self, seconds_per_km, seconds_per_mile):
-        pace_km = Pace(seconds_per_km)
+        pace_km = Pace(seconds_per_km=seconds_per_km)
         pace_mi = Pace(seconds_per_mile=seconds_per_mile)
         assert pace_km.seconds_per_km == pytest.approx(pace_mi.seconds_per_km, abs=0.01)
 

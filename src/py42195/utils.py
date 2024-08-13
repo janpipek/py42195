@@ -21,11 +21,24 @@ def parse_interval(s: Optional[str], /) -> Optional[timedelta]:
         frags = [float(frag) for frag in frags]
         if len(frags) == 1:
             interval = timedelta(seconds=float(frags[0]))
+        seconds = frags[-1]
+        if len(frags) > 3:
+            raise ValueError(f"Cannot parse as time: {s}")
         else:
+            minutes = frags[-2] if len(frags) > 1 else 0
+            hours = frags[-3] if len(frags) == 3 else 0
+            if math.floor(hours) != hours:
+                raise ValueError(f"Hours must be an integer: {s}")
+            if minutes and seconds >= 60:
+                raise ValueError(f"Cannot have more than 60 seconds in a minute: {s}")
+            if math.floor(minutes) != minutes:
+                raise ValueError(f"Minutes must be an integer: {s}")
+            if hours and minutes >= 60:
+                raise ValueError(f"Cannot have more than 60 minutes in an hour: {s}")
             interval = timedelta(
-                hours=frags[-3] if len(frags) == 3 else 0,
-                minutes=frags[-2],
-                seconds=frags[-1],
+                hours=hours,
+                minutes=minutes,
+                seconds=seconds,
             )
         if not interval.total_seconds():
             return None

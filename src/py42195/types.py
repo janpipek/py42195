@@ -5,7 +5,7 @@ from typing import Any, Self
 
 from typing_extensions import ClassVar, Optional
 
-from py42195.config import get_unit_system
+from py42195.config import get_default_unit, get_unit_system
 from py42195.constants import (
     FEET_IN_KM,
     HALF_MARATHON_IN_KM,
@@ -31,8 +31,8 @@ class Distance:
 
     def __init__(
         self,
-        km: Optional[float] = None,
         *,
+        km: Optional[float] = None,
         m: Optional[float] = None,
         mi: Optional[float] = None,
         yd: Optional[float] = None,
@@ -85,17 +85,17 @@ class Distance:
 
     def __add__(self, other: "Distance") -> "Distance":
         if isinstance(other, Distance):
-            return Distance(self.km + other.km)
+            return Distance(km=self.km + other.km)
         return NotImplemented
 
     def __sub__(self, other: "Distance") -> "Distance":
         if isinstance(other, Distance):
-            return Distance(self.km - other.km)
+            return Distance(km=self.km - other.km)
         return NotImplemented
 
     def __mul__(self, other):
         if isinstance(other, (int, float)):
-            return Distance(self.km * other)
+            return Distance(km=self.km * other)
         if isinstance(other, Pace):
             return Duration(self.km * other.seconds_per_km)
         else:
@@ -106,7 +106,7 @@ class Distance:
 
     def __truediv__(self, other):
         if isinstance(other, (int, float)):
-            return Distance(self.km / other)
+            return Distance(km=self.km / other)
         if isinstance(other, Distance):
             return self.km / other.km
         if isinstance(other, Duration):
@@ -166,16 +166,16 @@ class Duration:
         if isinstance(other, (int, float)):
             return Duration(self.seconds * other)
         if isinstance(other, Speed):
-            return Distance(self.seconds * other.km_h / 3600)
+            return Distance(km=self.seconds * other.km_h / 3600)
         return NotImplemented
 
     def __truediv__(self, other):
         if isinstance(other, (int, float)):
             return Duration(self.seconds / other)
         if isinstance(other, Distance):
-            return Pace(self.seconds / other.km)
+            return Pace(seconds_per_km=self.seconds / other.km)
         if isinstance(other, Pace):
-            return Distance(self.seconds / other.seconds_per_km)
+            return Distance(km=self.seconds / other.seconds_per_km)
         if isinstance(other, Duration):
             return self.seconds / other.seconds
         if isinstance(other, timedelta):
@@ -203,8 +203,8 @@ class Pace:
 
     def __init__(
         self,
-        seconds_per_km: Optional[float] = None,
         *,
+        seconds_per_km: Optional[float] = None,
         seconds_per_mile: Optional[float] = None,
     ):
         if (seconds_per_mile is not None) and (seconds_per_km is not None):
@@ -232,17 +232,17 @@ class Pace:
 
     def __add__(self, other):
         if isinstance(other, Pace):
-            return Pace(self.seconds_per_km + other.seconds_per_km)
+            return Pace(seconds_per_km=self.seconds_per_km + other.seconds_per_km)
         return NotImplemented
 
     def __sub__(self, other):
         if isinstance(other, Pace):
-            return Pace(self.seconds_per_km - other.seconds_per_km)
+            return Pace(seconds_per_km=self.seconds_per_km - other.seconds_per_km)
         return NotImplemented
 
     def __mul__(self, other):
         if isinstance(other, (int, float)):
-            return Pace(self.seconds_per_km * other)
+            return Pace(seconds_per_km=self.seconds_per_km * other)
         if isinstance(other, Distance):
             return Duration(self.seconds_per_km * other.km)
         else:
@@ -253,7 +253,7 @@ class Pace:
 
     def __truediv__(self, other):
         if isinstance(other, (int, float)):
-            return Pace(self.seconds_per_km / other)
+            return Pace(seconds_per_km=self.seconds_per_km / other)
         if isinstance(other, Pace):
             return self.seconds_per_km / other.seconds_per_km
         return NotImplemented
@@ -273,10 +273,10 @@ class Pace:
         # TODO: Allow imperial units
         if (delta := parse_interval(s)) is None:
             raise ValueError(f"Cannot parse as pace: {s}")
-        return cls(delta.total_seconds())
+        return cls(seconds_per_km=delta.total_seconds())
 
     def to_speed(self) -> "Speed":
-        return Speed(3600 / self.seconds_per_km)
+        return Speed(km_h=3600 / self.seconds_per_km)
 
 
 @total_ordering
@@ -296,8 +296,8 @@ class Speed:
 
     def __init__(
         self,
-        km_h: Optional[float] = None,
         *,
+        km_h: Optional[float] = None,
         mph: Optional[float] = None,
         m_s: Optional[float] = None,
     ) -> None:
@@ -349,7 +349,7 @@ class Speed:
         return self.km_h / MILES_IN_KM
 
     def to_pace(self) -> Pace:
-        return Pace(3600 / self.km_h)
+        return Pace(seconds_per_km=3600 / self.km_h)
 
     def __mul__(self, other):
         if isinstance(other, (int, float)):
@@ -392,7 +392,8 @@ def pace(value: Any, **kwargs) -> Pace:
             raise ValueError("Cannot provide kwargs when parsing from string")
         return Pace.parse(value)
     else:
-        return Pace(value, **kwargs)
+        default_unit = get_default_unit(Pace)
+        return Pace(**(kwargs | {default_unit: value}))
 
 
 def duration(value: Any) -> Duration:
@@ -402,15 +403,17 @@ def duration(value: Any) -> Duration:
         return Duration(value)
 
 
-def distance(value: Any) -> Distance:
+def distance(value: Any, **kwargs) -> Distance:
     if isinstance(value, str):
         return Distance.parse(value)
     else:
-        return Distance(value)
+        default_unit = get_default_unit(Distance)
+        return Distance(**(kwargs | {default_unit: value}))
 
 
-def speed(value: Any) -> Speed:
+def speed(value: Any, **kwargs) -> Speed:
     if isinstance(value, str):
         return Speed.parse(value)
     else:
-        return Speed(km_h=value)
+        default_unit = get_default_unit(Speed)
+        return Speed(**(kwargs | {default_unit: value}))

@@ -9,6 +9,21 @@ IMPERIAL = "imperial"
 
 _unit_system: ContextVar[str] = ContextVar("unit_system", default=METRIC)
 
+_default_units = {
+    METRIC: {
+        "Distance": "km",
+        "Duration": "s",
+        "Pace": "seconds_per_km",
+        "Speed": "km_h",
+    },
+    IMPERIAL: {
+        "Distance": "mi",
+        "Duration": "s",
+        "Pace": "seconds_per_mile",
+        "Speed": "mph",
+    },
+}
+
 
 def get_unit_system() -> str:
     return _unit_system.get()
@@ -30,3 +45,8 @@ def set_unit_system(system: str) -> ContextManager:
 
 
 set_unit_system(os.environ.get("PY42195_UNIT_SYSTEM", METRIC))
+
+
+def get_default_unit(quantity: type) -> str:
+    """Name of the argument that will be used as default unit for the given quantity."""
+    return _default_units[get_unit_system()][quantity.__name__]
