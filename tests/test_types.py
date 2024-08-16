@@ -6,6 +6,12 @@ from py42195.config import IMPERIAL, METRIC, set_unit_system
 from py42195.types import Distance, Pace, Speed, distance, duration, pace, speed
 
 
+@pytest.fixture
+def use_imperial_units():
+    with set_unit_system(IMPERIAL):
+        yield
+
+
 class TestDistance:
     def test_marathon_distances(self):
         assert pytest.approx(Distance.MARATHON.km, abs=0.01) == 42.195
@@ -65,6 +71,8 @@ class TestPace:
             ("source", "expected"),
             [
                 ("4:00", 240),
+                ("4:00/km", 240),
+                ("4:00 /mi", 149.1),
                 ("4:00.0", 240),
                 ("3:14.5", 194.5),
                 ("1:00:01", 3601),
@@ -72,7 +80,7 @@ class TestPace:
         )
         def test_valid(self, source, expected):
             pace = Pace.parse(source)
-            assert pace.seconds_per_km == expected
+            assert pace.seconds_per_km == pytest.approx(expected, abs=0.1)
 
         @pytest.mark.parametrize(
             "source",
@@ -91,6 +99,12 @@ class TestPace:
         def test_invalid(self, source):
             with pytest.raises(ValueError):
                 Pace.parse(source)
+
+        def test_parse_with_imperial(
+            self, use_imperial_units,
+        ):
+            pace = Pace.parse("4:00")
+            assert pace.seconds_per_mile == pytest.approx(240)
 
     @pytest.mark.parametrize(
         ("seconds_per_km", "seconds_per_mile"), [(240, 386.24), (math.inf, math.inf)]

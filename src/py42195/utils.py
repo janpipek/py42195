@@ -12,7 +12,7 @@ def parse_interval(s: str, /) -> timedelta:
     :param s: Interval in the "[hh]:[mm]:ss[.sss]" format
     """
     if not isinstance(s, str):
-        return TypeError(f"Expected string, got {type(s)}")    
+        raise TypeError(f"Expected string, got {type(s)}")    
     match = re.match(f"^{INTERVAL_PATTERN}$", s)
 
     if not match:

@@ -14,7 +14,7 @@ from py42195.constants import (
     MILES_IN_KM,
     YARDS_IN_KM,
 )
-from py42195.utils import format_interval, parse_interval
+from py42195.utils import format_interval, parse_interval, INTERVAL_PATTERN
 
 
 @total_ordering
@@ -203,10 +203,10 @@ class Pace:
 
     ALLOWED_UNITS = {
         "/km": "seconds_per_km",
-        "/mi": "sedonds_per_mi",
+        "/mi": "seconds_per_mile",
     }
     PARSE_PATTERN: re.Pattern = re.compile(
-        r"^(?P<value>\d+(\.\d+)?)\s*(?P<unit>" + "|".join(ALLOWED_UNITS) + ")?$"
+        f"^(?P<interval>{INTERVAL_PATTERN})\\s*(?P<unit>" + "|".join(ALLOWED_UNITS) + ")?$"
     )
 
     def __init__(
@@ -232,12 +232,16 @@ class Pace:
     def seconds_per_mile(self) -> float:
         return self.seconds_per_km * MILES_IN_KM
 
-    def __str__(self):
-        return format_interval(self.seconds_per_km)
+    def __str__(self) -> str:
+        if get_unit_system() == "imperial":
+            return format_interval(self.seconds_per_mile) + "/mi"
+        return format_interval(self.seconds_per_mile) + "/km"
 
     def __repr__(self) -> str:
-        return f"pace('{self!s}')"
-
+        if get_unit_system() == "imperial":
+            return f"Pace(seconds_per_mile={self.seconds_per_mile})"
+        return f"Pace(seconds_per_km={self.seconds_per_km})"
+    
     def __add__(self, other):
         if isinstance(other, Pace):
             return Pace(seconds_per_km=self.seconds_per_km + other.seconds_per_km)
@@ -278,10 +282,12 @@ class Pace:
 
     @classmethod
     def parse(cls, s: str, /) -> Self:
-        # TODO: Allow imperial units
-        if (delta := parse_interval(s)) is None:
+        match = re.match(cls.PARSE_PATTERN, s)
+        if not match:
             raise ValueError(f"Cannot parse as pace: {s}")
-        return cls(seconds_per_km=delta.total_seconds())
+        unit = cls.ALLOWED_UNITS.get(match.group("unit")) or get_default_unit(cls)
+        value = parse_interval(match.group("interval")).total_seconds()
+        return cls(**{unit: value})
 
     def to_speed(self) -> "Speed":
         return Speed(km_h=3600 / self.seconds_per_km)
