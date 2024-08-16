@@ -1,6 +1,6 @@
 # py42195
 
-Tiny library in pure Python to help you keep in (running) pace.
+Tiny library in pure Python to help you keep in (running) pace. It defines classes for Distance, Pace, Duration and Speeds, together with (hopefully) complete arithmetics capabilities and string IO, both in metric and imperial unit systems.
 
 ## Installation
 
@@ -16,7 +16,9 @@ How fast do I (well, not me) need to be to finish a marathon in 2 hours?
 >>> from py42195 import duration, Distance
 >>> desired_pace = duration("2:00:00") / Distance.MARATHON
 >>> desired_pace
-pace('2:50.6')
+Pace(seconds_per_km=170.63633131887664)   # repr
+>>> print(desired_pace)
+2:50.6/km                                 # str
 ```
 
 What would be the speed in mph?
@@ -43,7 +45,7 @@ How long will it take me to run 10 miles at a pace of 5:00 min/km?
 >>> my_pace = pace("5:00")
 >>> my_distance = distance("10 mi")
 >>> my_pace * my_distance
-duration('1:20:28')
+duration('1:20:28.0')
 ```
 
 ## Configuration
