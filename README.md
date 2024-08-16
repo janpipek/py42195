@@ -59,8 +59,3 @@ By default, the library uses the metric system. You can change it by calling `se
 
 You can also explicitly choose the unit system ("metric" or "imperial") using the
 `PY42195_UNIT_SYSTEM` environment variable.
-
-## TODOs
-
-- [ ] Add proper support for imperial units in printing
-- [ ] Add more documentation
