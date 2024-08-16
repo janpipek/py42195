@@ -14,7 +14,7 @@ from py42195.constants import (
     MILES_IN_KM,
     YARDS_IN_KM,
 )
-from py42195.utils import format_interval, parse_interval, INTERVAL_PATTERN
+from py42195.utils import INTERVAL_PATTERN, format_interval, parse_interval
 
 
 @total_ordering
@@ -38,7 +38,11 @@ class Distance:
         yd: Optional[float] = None,
         ft: Optional[float] = None,
     ):
-        args_given = [unit for unit, val in locals().items() if unit in self.ALLOWED_UNITS and val is not None]
+        args_given = [
+            unit
+            for unit, val in locals().items()
+            if unit in self.ALLOWED_UNITS and val is not None
+        ]
         if len(args_given) != 1:
             raise ValueError(
                 f"Exactly one of the following arguments should be provided: {', '.join(self.ALLOWED_UNITS)}, "
@@ -206,7 +210,9 @@ class Pace:
         "/mi": "seconds_per_mile",
     }
     PARSE_PATTERN: re.Pattern = re.compile(
-        f"^(?P<interval>{INTERVAL_PATTERN})\\s*(?P<unit>" + "|".join(ALLOWED_UNITS) + ")?$"
+        f"^(?P<interval>{INTERVAL_PATTERN})\\s*(?P<unit>"
+        + "|".join(ALLOWED_UNITS)
+        + ")?$"
     )
 
     def __init__(
@@ -235,13 +241,13 @@ class Pace:
     def __str__(self) -> str:
         if get_unit_system() == "imperial":
             return format_interval(self.seconds_per_mile) + "/mi"
-        return format_interval(self.seconds_per_mile) + "/km"
+        return format_interval(self.seconds_per_km) + "/km"
 
     def __repr__(self) -> str:
         if get_unit_system() == "imperial":
             return f"Pace(seconds_per_mile={self.seconds_per_mile})"
         return f"Pace(seconds_per_km={self.seconds_per_km})"
-    
+
     def __add__(self, other):
         if isinstance(other, Pace):
             return Pace(seconds_per_km=self.seconds_per_km + other.seconds_per_km)
@@ -315,7 +321,11 @@ class Speed:
         mph: Optional[float] = None,
         m_s: Optional[float] = None,
     ) -> None:
-        args_given = [unit for unit, val in locals().items() if unit in self.ALLOWED_UNITS.values() and val is not None]
+        args_given = [
+            unit
+            for unit, val in locals().items()
+            if unit in self.ALLOWED_UNITS.values() and val is not None
+        ]
         if len(args_given) != 1:
             raise ValueError(
                 f"Exactly one of the following arguments should be provided: {', '.join(self.ALLOWED_UNITS)}, "
@@ -409,8 +419,11 @@ def pace(value: Any, **kwargs) -> Pace:
 
 
 def duration(value: Any) -> Duration:
+    """Construct a Duration object from various types."""
     if isinstance(value, str):
         return Duration.parse(value)
+    if isinstance(value, Duration):
+        return value
     else:
         return Duration(value)
 
@@ -418,6 +431,8 @@ def duration(value: Any) -> Duration:
 def distance(value: Any, **kwargs) -> Distance:
     if isinstance(value, str):
         return Distance.parse(value)
+    if isinstance(value, Distance):
+        return value
     else:
         default_unit = get_default_unit(Distance)
         return Distance(**(kwargs | {default_unit: value}))
@@ -426,6 +441,8 @@ def distance(value: Any, **kwargs) -> Distance:
 def speed(value: Any, **kwargs) -> Speed:
     if isinstance(value, str):
         return Speed.parse(value)
+    if isinstance(value, Speed):
+        return value
     else:
         default_unit = get_default_unit(Speed)
         return Speed(**(kwargs | {default_unit: value}))

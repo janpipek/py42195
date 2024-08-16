@@ -101,7 +101,8 @@ class TestPace:
                 Pace.parse(source)
 
         def test_parse_with_imperial(
-            self, use_imperial_units,
+            self,
+            use_imperial_units,
         ):
             pace = Pace.parse("4:00")
             assert pace.seconds_per_mile == pytest.approx(240)
@@ -157,7 +158,7 @@ class TestSpeed:
 class TestArithmetics:
     def test_marathon_record_pace(self):
         pace = duration("2:00:35") / Distance.MARATHON
-        assert str(pace) == "2:51.5"
+        assert str(pace) == "2:51.5/km"
 
     def test_marathon_at_4_min_pace(self):
         duration = Distance.MARATHON * pace("4:00")

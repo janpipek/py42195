@@ -7,7 +7,7 @@ METRIC = "metric"
 IMPERIAL = "imperial"
 
 
-_unit_system: ContextVar[str] = ContextVar("unit_system", default=METRIC)
+_unit_system: ContextVar[str] = ContextVar("unit_system", default=None)
 
 _default_units = {
     METRIC: {
@@ -26,7 +26,8 @@ _default_units = {
 
 
 def get_unit_system() -> str:
-    return _unit_system.get()
+    unit_system = _unit_system.get()
+    return unit_system or os.environ.get("PY42195_UNIT_SYSTEM", METRIC)
 
 
 def set_unit_system(system: str) -> ContextManager:
@@ -42,9 +43,6 @@ def set_unit_system(system: str) -> ContextManager:
 
     _reset_token = _unit_system.set(system)
     return _UnitSystem()
-
-
-set_unit_system(os.environ.get("PY42195_UNIT_SYSTEM", METRIC))
 
 
 def get_default_unit(quantity: type) -> str:

@@ -2,7 +2,6 @@ import math
 import re
 from datetime import timedelta
 
-
 INTERVAL_PATTERN = r"((?P<hour>\d+:)?(?P<minute>\d?\d:))?(?P<second>\d?\d(\.\d+)?)"
 
 
@@ -12,12 +11,9 @@ def parse_interval(s: str, /) -> timedelta:
     :param s: Interval in the "[hh]:[mm]:ss[.sss]" format
     """
     if not isinstance(s, str):
-        raise TypeError(f"Expected string, got {type(s)}")    
-    match = re.match(f"^{INTERVAL_PATTERN}$", s)
-
-    if not match:
+        raise TypeError(f"Expected string, got {type(s)}")
+    if not (match := re.match(f"^{INTERVAL_PATTERN}$", s)):
         raise ValueError(f"Cannot parse as time: {s}")
-    
 
     h, m = (int(match[i][:-1]) if match[i] else 0 for i in ("hour", "minute"))
     s = float(match["second"])
