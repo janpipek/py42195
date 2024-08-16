@@ -1,51 +1,33 @@
 import math
+import re
 from datetime import timedelta
-from typing import Optional
 
 
-def parse_interval(s: Optional[str], /) -> Optional[timedelta]:
+INTERVAL_PATTERN = r"((?P<hour>\d+:)?(?P<minute>\d?\d:))?(?P<second>\d?\d(\.\d+)?)"
+
+
+def parse_interval(s: str, /) -> timedelta:
     """Parse various intervals that can represent duration.
 
     :param s: Interval in the "[hh]:[mm]:ss[.sss]" format
-    :return:
     """
-    if not s:
-        return None
-    elif s in ["-", "nan", "np.nan"]:
-        return None
-    elif not isinstance(s, str):
-        return TypeError(f"Expected string, got {type(s)}")
+    if not isinstance(s, str):
+        return TypeError(f"Expected string, got {type(s)}")    
+    match = re.match(f"^{INTERVAL_PATTERN}$", s)
 
-    try:
-        frags = s.split(":")
-        frags = [float(frag) for frag in frags]
-        if len(frags) == 1:
-            interval = timedelta(seconds=float(frags[0]))
-        seconds = frags[-1]
-        if len(frags) > 3:
-            raise ValueError(f"Cannot parse as time: {s}")
-        else:
-            minutes = frags[-2] if len(frags) > 1 else 0
-            hours = frags[-3] if len(frags) == 3 else 0
-            if math.floor(hours) != hours:
-                raise ValueError(f"Hours must be an integer: {s}")
-            if minutes and seconds >= 60:
-                raise ValueError(f"Cannot have more than 60 seconds in a minute: {s}")
-            if math.floor(minutes) != minutes:
-                raise ValueError(f"Minutes must be an integer: {s}")
-            if hours and minutes >= 60:
-                raise ValueError(f"Cannot have more than 60 minutes in an hour: {s}")
-            interval = timedelta(
-                hours=hours,
-                minutes=minutes,
-                seconds=seconds,
-            )
-        if not interval.total_seconds():
-            return None
-        else:
-            return interval
-    except ValueError:
+    if not match:
         raise ValueError(f"Cannot parse as time: {s}")
+    
+
+    h, m = (int(match[i][:-1]) if match[i] else 0 for i in ("hour", "minute"))
+    s = float(match["second"])
+
+    if (h or m) and s >= 60:
+        raise ValueError(f"Cannot parse as time: {s}")
+    if h and m >= 60:
+        raise ValueError(f"Cannot parse as time: {s}")
+
+    return timedelta(hours=h, minutes=m, seconds=s)
 
 
 def format_interval(
