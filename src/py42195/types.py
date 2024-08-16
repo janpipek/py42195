@@ -38,7 +38,7 @@ class Distance:
         yd: Optional[float] = None,
         ft: Optional[float] = None,
     ):
-        args_given = [unit for unit in self.ALLOWED_UNITS if locals().get(unit)]
+        args_given = [unit for unit, val in locals().items() if unit in self.ALLOWED_UNITS and val is not None]
         if len(args_given) != 1:
             raise ValueError(
                 f"Exactly one of the following arguments should be provided: {', '.join(self.ALLOWED_UNITS)}, "
@@ -201,6 +201,14 @@ class Duration:
 class Pace:
     seconds_per_km: float
 
+    ALLOWED_UNITS = {
+        "/km": "seconds_per_km",
+        "/mi": "sedonds_per_mi",
+    }
+    PARSE_PATTERN: re.Pattern = re.compile(
+        r"^(?P<value>\d+(\.\d+)?)\s*(?P<unit>" + "|".join(ALLOWED_UNITS) + ")?$"
+    )
+
     def __init__(
         self,
         *,
@@ -301,9 +309,7 @@ class Speed:
         mph: Optional[float] = None,
         m_s: Optional[float] = None,
     ) -> None:
-        args_given = [
-            unit for unit in set(self.ALLOWED_UNITS.values()) if locals().get(unit)
-        ]
+        args_given = [unit for unit, val in locals().items() if unit in self.ALLOWED_UNITS.values() and val is not None]
         if len(args_given) != 1:
             raise ValueError(
                 f"Exactly one of the following arguments should be provided: {', '.join(self.ALLOWED_UNITS)}, "
