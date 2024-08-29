@@ -163,3 +163,6 @@ class TestArithmetics:
     def test_marathon_at_4_min_pace(self):
         duration = Distance.MARATHON * pace("4:00")
         assert str(duration) == "2:48:46.8"
+
+    def test_sum(self):
+        assert sum([Distance(km=1), Distance(km=3)]) == Distance(km=4)

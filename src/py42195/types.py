@@ -92,6 +92,12 @@ class Distance:
             return Distance(km=self.km + other.km)
         return NotImplemented
 
+    def __radd__(self, other: Any) -> "Distance":
+        if other == 0:
+            # Support sum
+            return self
+        return other + self
+
     def __sub__(self, other: "Distance") -> "Distance":
         if isinstance(other, Distance):
             return Distance(km=self.km - other.km)
@@ -160,6 +166,12 @@ class Duration:
         if isinstance(other, Duration):
             return Duration(self.seconds + other.seconds)
         return NotImplemented
+
+    def __radd__(self, other: Any) -> "Duration":
+        if other == 0:
+            # Support sum
+            return self
+        return other + self
 
     def __sub__(self, other: "Duration") -> "Duration":
         if isinstance(other, Duration):
@@ -252,6 +264,12 @@ class Pace:
         if isinstance(other, Pace):
             return Pace(seconds_per_km=self.seconds_per_km + other.seconds_per_km)
         return NotImplemented
+
+    def __radd__(self, other: Any) -> "Pace":
+        if other == 0:
+            # Support sum
+            return self
+        return other + self
 
     def __sub__(self, other):
         if isinstance(other, Pace):
@@ -388,6 +406,12 @@ class Speed:
         if isinstance(other, Speed):
             return Speed(km_h=self.km_h + other.km_h)
         return NotImplemented
+
+    def __radd__(self, other: Any) -> "Speed":
+        if other == 0:
+            # Support sum
+            return self
+        return other + self
 
     def __sub__(self, other, /):
         if isinstance(other, Speed):
