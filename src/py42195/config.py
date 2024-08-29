@@ -1,5 +1,6 @@
 import os
 from contextvars import ContextVar
+from typing import Optional
 
 from typing_extensions import ContextManager
 
@@ -7,7 +8,7 @@ METRIC = "metric"
 IMPERIAL = "imperial"
 
 
-_unit_system: ContextVar[str] = ContextVar("unit_system", default=None)
+_unit_system: ContextVar[Optional[str]] = ContextVar("unit_system", default=None)
 
 _default_units = {
     METRIC: {
@@ -27,7 +28,7 @@ _default_units = {
 
 def get_unit_system() -> str:
     unit_system = _unit_system.get()
-    return unit_system or os.environ.get("PY42195_UNIT_SYSTEM", METRIC)
+    return unit_system or os.environ.get("PY42195_UNIT_SYSTEM", METRIC)  # type: ignore
 
 
 def set_unit_system(system: str) -> ContextManager:
