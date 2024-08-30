@@ -69,3 +69,4 @@ You can also explicitly choose the unit system ("metric" or "imperial") using th
 - fast computation for arrays
 - extension type for pandas (perhaps?)
 - compatibility with `pint` or `astropy` units (perhaps?)
+- simple CLI tool
