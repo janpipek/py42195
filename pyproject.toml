@@ -14,8 +14,13 @@ Homepage = "https://github.com/janpipek/py42195"
 dev = ["pytest", "mypy"]
 
 [build-system]
-requires = ["setuptools >= 61.0"]
+requires = ["setuptools >= 72.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.isort]
 profile = "black"
+
+[tool.uv]
+dev-dependencies = [
+  "pytest >=8.1.1,<9", "mypy"
+]
