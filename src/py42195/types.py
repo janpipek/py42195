@@ -299,6 +299,11 @@ class Pace:
             return self.seconds_per_km / other.seconds_per_km
         return NotImplemented
 
+    def __rtruediv__(self, other):
+        if isinstance(other, timedelta):
+            return Duration(other) / self
+        return NotImplemented
+
     def __eq__(self, other: object, /) -> bool:
         if isinstance(other, Pace):
             return self.seconds_per_km == other.seconds_per_km

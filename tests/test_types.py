@@ -135,6 +135,11 @@ class TestPace:
                 Pace.parse(a_pace).to_speed().km_h, abs=0.001
             )
 
+    def test_rtruediv(self):
+        duration = timedelta(seconds=240)
+        pace = Pace(seconds_per_km=480)
+        assert duration / pace == Distance(km=0.5)
+
 
 class TestSpeed:
     class TestParse:
