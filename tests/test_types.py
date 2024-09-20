@@ -1,4 +1,5 @@
 import math
+from datetime import timedelta
 
 import pytest
 
@@ -63,6 +64,11 @@ class TestDistance:
         a_distance = distance(value)
         with set_unit_system(unit_system or METRIC):
             assert str(a_distance) == expected
+
+    def test_rtruediv(self):
+        duration = timedelta(seconds=240)
+        distance = Distance(km=1)
+        assert duration / distance == pace("4:00")
 
 
 class TestPace:
