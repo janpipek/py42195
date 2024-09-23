@@ -1,8 +1,6 @@
 import os
 from contextvars import ContextVar
-from typing import Optional
-
-from typing_extensions import ContextManager
+from typing import ContextManager, Optional
 
 METRIC = "metric"
 IMPERIAL = "imperial"

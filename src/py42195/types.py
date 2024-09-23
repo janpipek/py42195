@@ -1,9 +1,7 @@
 import re
 from datetime import timedelta
 from functools import total_ordering
-from typing import Any, Self
-
-from typing_extensions import ClassVar, Optional
+from typing import Any, ClassVar, Optional, Self
 
 from py42195.config import get_default_unit, get_unit_system
 from py42195.constants import (

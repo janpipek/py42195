@@ -1,7 +1,7 @@
 [project]
 name = "py42195"
 version = "0.1.0"
-requires-python = ">= 3.10"
+requires-python = ">= 3.11"
 dependencies = []
 authors = [{ name = "Jan Pipek", email = "jan.pipek@gmail.com" }]
 readme = "README.md"
