@@ -2,6 +2,8 @@
 
 Tiny library in pure Python to help you keep in (running) pace. It defines classes for Distance, Pace, Duration and Speeds, together with (hopefully) complete arithmetics capabilities and string IO, both in metric and imperial unit systems.
 
+All started with a task (worth five minutes): "I have these ten pace values and ten distances. Let's compute the total duration." Typically, these problems are best solved by hours of coding :-D
+
 ## Installation
 
 ```bash
@@ -61,3 +63,10 @@ By default, the library uses the metric system. You can change it by calling `se
 
 You can also explicitly choose the unit system ("metric" or "imperial") using the
 `PY42195_UNIT_SYSTEM` environment variable.
+
+## Not included
+
+- fast computation for arrays
+- extension type for pandas (perhaps?)
+- compatibility with `pint` or `astropy` units (perhaps?)
+- simple CLI tool
