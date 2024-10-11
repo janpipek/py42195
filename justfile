@@ -1,7 +1,3 @@
-nox:
-    # Run the full tests suite via nox
-    uvx --with "nox>=2021.10.9" nox
-
 bump-minor:
     # Bump the version from x.y.z to x.(y+1).0
     uvx bumpver update --tag final --minor
