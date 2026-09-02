@@ -4,7 +4,7 @@ from datetime import timedelta
 import pytest
 
 from py42195.config import IMPERIAL, METRIC, set_unit_system
-from py42195.types import Distance, Duration, Pace, Speed, distance, duration, pace, speed
+from py42195.types import Distance, Pace, Speed, distance, duration, pace, speed
 
 
 @pytest.fixture
