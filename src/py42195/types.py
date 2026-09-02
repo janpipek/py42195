@@ -118,7 +118,7 @@ class Distance:
         if isinstance(other, Distance):
             return self.km / other.km
         if isinstance(other, Duration):
-            return Speed(km_h=self.km / (other.seconds * 3600))
+            return Speed(km_h=self.km / (other.seconds / 3600))
         if isinstance(other, Speed):
             return Duration(self.km / other.km_h * 3600)
         return NotImplemented

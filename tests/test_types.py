@@ -4,7 +4,7 @@ from datetime import timedelta
 import pytest
 
 from py42195.config import IMPERIAL, METRIC, set_unit_system
-from py42195.types import Distance, Pace, Speed, distance, duration, pace, speed
+from py42195.types import Distance, Duration, Pace, Speed, distance, duration, pace, speed
 
 
 @pytest.fixture
@@ -177,3 +177,6 @@ class TestArithmetics:
 
     def test_sum(self):
         assert sum([Distance(km=1), Distance(km=3)]) == Distance(km=4)
+
+    def test_speed(self):
+        assert Distance(km=10) / duration("1:00:00") == Speed(km_h=10)
