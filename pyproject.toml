@@ -19,3 +19,6 @@ build-backend = "setuptools.build_meta"
 
 [tool.isort]
 profile = "black"
+
+[tool.basedpyright]
+pythonVersion = "3.11"

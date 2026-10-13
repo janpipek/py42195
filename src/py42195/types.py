@@ -1,7 +1,7 @@
 import re
 from datetime import timedelta
 from functools import total_ordering
-from typing import Any, ClassVar, Optional, Self
+from typing import Any, ClassVar, Self
 
 from py42195.config import get_default_unit, get_unit_system
 from py42195.constants import (
@@ -22,19 +22,19 @@ class Distance:
     MARATHON: ClassVar["Distance"]
     HALF_MARATHON: ClassVar["Distance"]
 
-    ALLOWED_UNITS = ["km", "mi", "m", "yd", "ft"]
-    PARSE_PATTERN: re.Pattern = re.compile(
+    ALLOWED_UNITS: ClassVar[list[str]] = ["km", "mi", "m", "yd", "ft"]
+    PARSE_PATTERN: re.Pattern[str] = re.compile(
         r"^(?P<value>\d+(\.\d+)?)\s*(?P<unit>" + "|".join(ALLOWED_UNITS) + ")?$"
     )
 
     def __init__(
         self,
         *,
-        km: Optional[float] = None,
-        m: Optional[float] = None,
-        mi: Optional[float] = None,
-        yd: Optional[float] = None,
-        ft: Optional[float] = None,
+        km: float | None = None,
+        m: float | None = None,
+        mi: float | None = None,
+        yd: float | None = None,
+        ft: float | None = None,
     ):
         args_given = [
             unit
@@ -44,7 +44,7 @@ class Distance:
         if len(args_given) != 1:
             raise ValueError(
                 f"Exactly one of the following arguments should be provided: {', '.join(self.ALLOWED_UNITS)}, "
-                f"got {len(args_given)}: {', '.join(args_given)}"
+                + f"got {len(args_given)}: {', '.join(args_given)}"
             )
 
         if km is not None:
@@ -233,8 +233,8 @@ class Pace:
     def __init__(
         self,
         *,
-        seconds_per_km: Optional[float] = None,
-        seconds_per_mile: Optional[float] = None,
+        seconds_per_km: float | None = None,
+        seconds_per_mile: float | None = None,
     ):
         if (seconds_per_mile is not None) and (seconds_per_km is not None):
             raise ValueError(
@@ -343,9 +343,9 @@ class Speed:
     def __init__(
         self,
         *,
-        km_h: Optional[float] = None,
-        mph: Optional[float] = None,
-        m_s: Optional[float] = None,
+        km_h: float | None = None,
+        mph: float | None = None,
+        m_s: float | None = None,
     ) -> None:
         args_given = [
             unit
@@ -363,7 +363,7 @@ class Speed:
         elif mph is not None:
             self.km_h = mph * MILES_IN_KM
         elif m_s is not None:
-            self.km_h = m_s * 3600 / 1000
+            self.km_h = m_s * 3.6
 
         if not isinstance(self.km_h, (int, float)):
             raise ValueError("Speed should be a number.")
@@ -390,7 +390,7 @@ class Speed:
 
     @property
     def m_s(self) -> float:
-        return self.km_h * 1000 / 3600
+        return self.km_h / 3.6
 
     @property
     def mph(self) -> float:
