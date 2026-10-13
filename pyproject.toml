@@ -10,6 +10,10 @@ license = "MIT"
 [project.urls]
 Homepage = "https://github.com/janpipek/py42195"
 
+[project.optional-dependencies]
+dev = ["pytest", "mypy"]
+all = ["py42195[dev]"]
+
 [dependency-groups]
 dev = ["pytest", "mypy"]
 

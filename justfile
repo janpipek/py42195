@@ -1,22 +1,32 @@
+_:
+    @just --list
+
+# Test for this version
 test:
     uv run pytest
 
+# Test for multiple version using nox
+nox:
+    uvx --with nox nox
+
+# Test typing with mypy (we want this to succeed)
 mypy:
-    # Test typing with mypy (we want this to succeed)
     uv run mypy src/ tests/
 
+# Test with pyright (we don't aim yet)
 pyright:
-    # Optionally test with pyright (we don't aim yet)
-    uv run --python 3.12 --with pyright pyright
+    uv run --python 3.11 --with pyright pyright
 
+# Run all the pre-commit checks on the whole code-base
 pre-commit:
-    # Run all the pre-commit checks on the whole code-base
     uvx pre-commit run --all
 
+# Build the package
 build:
     rm -rf dist/
     uv build
     rm -rf src/physt.egg-info
 
+# Publish to PyPI (via twine)
 publish: build
-    uv publish
+    uvx twine upload dist/*
