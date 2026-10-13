@@ -15,7 +15,7 @@ mypy:
 
 # Test with pyright (we don't aim yet)
 pyright:
-    uv run --python 3.11 --with pyright pyright
+    uv run --python 3.11 --with pyright pyright src/ tests/
 
 # Run all the pre-commit checks on the whole code-base
 pre-commit:
